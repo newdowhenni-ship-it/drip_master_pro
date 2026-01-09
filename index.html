@@ -211,6 +211,12 @@
         function initConfetti() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; pieces = []; for (let i = 0; i < 60; i++) pieces.push({ x: confettiCanvas.width / 2, y: confettiCanvas.height / 2, vx: (Math.random() - 0.5) * 15, vy: Math.random() * -20 - 10, size: Math.random() * 6 + 4, color: ['#d4af37', '#b87333', '#fff'][Math.floor(Math.random()*3)], gravity: 0.6, angle: Math.random() * 6.28 }); requestAnimationFrame(updateConfetti); }
         function updateConfetti() { if (pieces.length === 0) return; ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); pieces.forEach((p) => { p.vy += p.gravity; p.x += p.vx; p.y += p.vy; p.angle += 0.1; ctx.fillStyle = p.color; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle); ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size); ctx.restore(); }); pieces = pieces.filter(p => p.y < confettiCanvas.height); if (pieces.length > 0) requestAnimationFrame(updateConfetti); }
         updateLogic();
+        
+        if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/drip_master_pro/sw.js')
+    .then(() => console.log('Service Worker Registered'));
+}
     </script>
 </body>
 </html>
+
