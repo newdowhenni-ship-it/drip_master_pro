@@ -154,6 +154,12 @@
             ringGroup.appendChild(circle);
         });
 
+        if ('serviceWorker' in navigator) {
+    // 登録パスにリポジトリ名を含める
+    navigator.serviceWorker.register('/drip_master_pro/sw.js')
+      .then(() => console.log('Service Worker Registered'));
+  }
+
         async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
         function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
         function triggerVibration(isSpecial = false) { if ('vibrate' in navigator) { if (isSpecial) navigator.vibrate([100, 50, 100, 50, 300]); else navigator.vibrate(150); } }
@@ -237,3 +243,4 @@
     </script>
 </body>
 </html>
+
