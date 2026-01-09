@@ -15,6 +15,15 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* 画面外へのハミ出しを禁止 */
+        overscroll-behavior-y: none; /* これが「引き下げ更新」を防ぐ魔法の1行です */
+        position: fixed; /* 画面を固定して揺れを防止 */
+    }
         :root { 
             --bg-start: #fdfaf7; --bg-end: #e8e2d9; 
             --coffee: #5d4037; --accent: #d35400; 
@@ -227,4 +236,5 @@
     </script>
 </body>
 </html>
+
 
