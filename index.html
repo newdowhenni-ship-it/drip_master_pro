@@ -2,8 +2,16 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Drip Master Pro</title>
+    
+    <link rel="manifest" href="/drip_master_pro/manifest.json">
+    <meta name="theme-color" content="#5d4037">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DripMaster">
+    <link rel="apple-touch-icon" href="/drip_master_pro/icon-192.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -23,49 +31,33 @@
             margin: 0; padding: 0 15px; color: #333; overflow-y: auto; height: 100vh;
             display: flex; flex-direction: column; align-items: center;
         }
-        
         .main-wrapper { max-width: 400px; width: 100%; display: flex; flex-direction: column; height: 100%; justify-content: space-around; padding: 5px 0; }
         .timer-container { margin: 5px 0; display: inline-block; padding: 10px 45px; border-radius: var(--radius); background: var(--timer-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); align-self: center; }
         .timer { font-family: 'Roboto Mono', monospace; font-size: 3.5rem; margin: 0; color: var(--time); letter-spacing: -2px; line-height: 1; }
-        
         .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
         .recipe-btn { padding: 8px; font-size: 0.8rem; border: 2px solid var(--coffee); background: rgba(255,255,255,0.8); color: var(--coffee); border-radius: var(--radius); font-weight: bold; cursor: pointer; }
         .recipe-btn.active { background: var(--coffee); color: white; }
-
         .target-container { position: relative; width: 340px; height: 260px; margin: 5px auto -20px auto; display: flex; align-items: center; justify-content: center; }
         .progress-ring { position: absolute; }
         .progress-ring__circle { transition: stroke-dashoffset 0.1s linear, stroke 0.3s, opacity 0.3s; stroke-linecap: round; fill: transparent; }
         .progress-ring__bg { stroke: var(--inactive-gray); opacity: 0.25; fill: transparent; }
-        
         .target-area { z-index: 2; text-align: center; width: 100%; }
         .status-badge { display: inline-block; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(4px); padding: 4px 16px; border-radius: var(--radius); margin-bottom: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .status { font-size: 0.85rem; font-weight: bold; color: var(--coffee); letter-spacing: 1px; text-transform: uppercase; transition: color 0.5s; }
         .target-water { font-family: 'Roboto Mono', monospace; font-size: 3.8rem; color: var(--accent); font-weight: 700; line-height: 1; }
         .cumulative-box { margin-top: 15px; font-family: 'Roboto Mono', monospace; font-size: 1.5rem; color: #444; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 8px; display: inline-block; min-width: 180px; }
         .cum-label { font-size: 0.75rem; color: #999; display: block; font-family: sans-serif; font-weight: bold; }
-
         .cup-container { width: 200px; height: 200px; margin: 0 auto; position: relative; }
         .cup-svg { width: 100%; height: 100%; overflow: visible; }
-        
         @keyframes refined-blink { 0% { opacity: 0.25; } 50% { opacity: 1; } 100% { opacity: 0.25; } }
         .pour-indicator { fill: var(--inactive-gray); opacity: 0.25; transition: fill 0.4s, opacity 0.4s; }
         .pour-indicator.active { fill: var(--water-accent); animation: refined-blink 1.0s infinite ease-in-out; }
-
         #dripperLiquid { transition: y 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; }
-        
-        @keyframes drop-fall { 
-            0% { transform: translateY(0); opacity: 0; } 
-            10% { opacity: 1; }
-            50% { opacity: 1; }
-            80% { opacity: 0; }
-            100% { transform: translateY(var(--drop-dist)); opacity: 0; } 
-        }
-        
+        @keyframes drop-fall { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 50% { opacity: 1; } 80% { opacity: 0; } 100% { transform: translateY(var(--drop-dist)); opacity: 0; } }
         .drop-coffee { fill: rgba(93, 64, 55, 0.4); visibility: hidden; }
         .active-coffee { visibility: visible !important; animation: drop-fall 0.8s infinite linear; }
         .finish-glow { animation: glow 2s infinite ease-in-out; }
         @keyframes glow { 0% { fill: #a1887f; } 50% { fill: #d4af37; filter: drop-shadow(0 0 10px #ffd700); } 100% { fill: #a1887f; } }
-
         .controls { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; margin-top: 5px; padding-bottom: 20px; width: 100%; }
         button.main-btn { height: 50px; font-size: 1rem; border-radius: var(--radius); border: none; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         #startBtn { background: var(--coffee); color: white; }
@@ -74,9 +66,8 @@
         #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
     </style>
 </head>
-<body id="body">
+<body>
     <canvas id="confetti"></canvas>
-
     <div class="main-wrapper">
         <div class="recipe-grid">
             <button class="recipe-btn" onclick="setRecipe('small_std', this)">10g / Std<br>160g</button>
@@ -84,26 +75,18 @@
             <button class="recipe-btn active" onclick="setRecipe('std_std', this)">15g / Std<br>240g</button>
             <button class="recipe-btn" onclick="setRecipe('std_light', this)">15g / Light<br>360g</button>
         </div>
-
         <div class="timer-container">
             <div class="timer" id="display">00:00</div>
         </div>
-
         <div class="target-container">
-            <svg class="progress-ring" width="340" height="260" viewBox="0 0 340 260">
-                <g id="rings-group"></g>
-            </svg>
+            <svg class="progress-ring" width="340" height="260" viewBox="0 0 340 260"><g id="rings-group"></g></svg>
             <div class="target-area">
                 <div class="status-badge"><div id="status" class="status">READY</div></div>
                 <div class="target-water"><span id="water">0.0</span><span style="font-size:1.6rem;margin-left:4px">g</span></div>
-                <div class="cumulative-box">
-                    <span class="cum-label">TOTAL TARGET</span>
-                    <span id="cum-water">0.0</span>g
-                </div>
+                <div class="cumulative-box"><span class="cum-label">TOTAL TARGET</span><span id="cum-water">0.0</span>g</div>
             </div>
         </div>
-
-        <div class="cup-container" id="cupSection">
+        <div class="cup-container">
             <svg class="cup-svg" viewBox="0 0 200 200">
                 <defs>
                     <clipPath id="innerCup"><path d="M60 80 L140 80 L135 150 Q133 170 110 170 L90 170 Q67 170 65 150 Z" /></clipPath>
@@ -113,9 +96,7 @@
                 <use id="water-1" href="#sharpDrop" x="0" y="-25" class="pour-indicator" />
                 <use id="water-2a" href="#sharpDrop" x="-16" y="-25" class="pour-indicator" />
                 <use id="water-2b" href="#sharpDrop" x="16" y="-25" class="pour-indicator" />
-                
                 <path id="coffeeDrop" class="drop-coffee" d="M100 65 Q103 65 103 70 Q103 75 100 75 Q97 75 97 70 Q97 65 100 65 Z" />
-                
                 <rect id="liquid" x="0" y="170" width="200" height="100" fill="#a1887f" clip-path="url(#innerCup)" />
                 <rect id="dripperLiquid" x="0" y="60" width="200" height="60" fill="#d7ccc8" clip-path="url(#innerDripper)" opacity="0" />
                 <path d="M60 80 L140 80 L135 150 Q133 170 110 170 L90 170 Q67 170 65 150 Z" fill="none" stroke="#5d4037" stroke-width="4" />
@@ -123,7 +104,6 @@
                 <path d="M65 10 L135 10 L105 60 L95 60 Z" fill="none" stroke="#8d6e63" stroke-width="2" stroke-dasharray="2,1" />
             </svg>
         </div>
-
         <div class="controls">
             <button onclick="toggleTimer()" id="startBtn" class="main-btn">START</button>
             <button onclick="skipStep()" id="skipBtn" class="main-btn">SKIP</button>
@@ -132,6 +112,12 @@
     </div>
 
     <script>
+        // PWA Service Worker 登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/drip_master_pro/sw.js')
+            .then(() => console.log('Service Worker Registered'));
+        }
+
         let timeMs = 0, timerId = null, wakeLock = null, lastPhase = -1, finishText = "", isLuckyFinish = false;
         const recipes = { small_std: { steam: 20, first: 100, second: 160 }, small_light: { steam: 20, first: 150, second: 240 }, std_std: { steam: 30, first: 150, second: 240 }, std_light: { steam: 30, first: 225, second: 360 } };
         const commonGreetings = ["Enjoy your coffee!", "Time for a break.", "Smells amazing!", "Your cup is ready.", "Relax and enjoy.", "Freshly brewed.", "Stay mindful.", "A sip of peace.", "Savor the flavor.", "Happiness in a cup.", "Take a deep breath.", "Enjoy the silence.", "Fuel for your soul.", "Sip, smile, repeat.", "Good coffee, good day."];
@@ -153,12 +139,6 @@
             circle.style.strokeDasharray = `${dashArray} ${circum}`; circle.style.strokeDashoffset = dashArray; circle.style.transform = `rotate(${90 + (360-arcLength)/2}deg)`; circle.style.transformOrigin = "center";
             ringGroup.appendChild(circle);
         });
-
-        if ('serviceWorker' in navigator) {
-    // 登録パスにリポジトリ名を含める
-    navigator.serviceWorker.register('/drip_master_pro/sw.js')
-      .then(() => console.log('Service Worker Registered'));
-  }
 
         async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
         function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
@@ -225,16 +205,7 @@
         function skipStep() { 
             const phases = [45, 75, 105, 135, 180]; 
             let sec = timeMs / 1000; 
-            for (let p of phases) { 
-                if (sec < p) { 
-                    const dLiq = document.getElementById('dripperLiquid');
-                    dLiq.style.transition = "none";
-                    timeMs = p * 1000; 
-                    updateLogic(); 
-                    setTimeout(() => { dLiq.style.transition = "y 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s"; }, 0);
-                    break; 
-                } 
-            } 
+            for (let p of phases) { if (sec < p) { const dLiq = document.getElementById('dripperLiquid'); dLiq.style.transition = "none"; timeMs = p * 1000; updateLogic(); setTimeout(() => { dLiq.style.transition = "y 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s"; }, 0); break; } } 
         }
         const confettiCanvas = document.getElementById('confetti'); const ctx = confettiCanvas.getContext('2d'); let pieces = [];
         function initConfetti() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; pieces = []; for (let i = 0; i < 60; i++) pieces.push({ x: confettiCanvas.width / 2, y: confettiCanvas.height / 2, vx: (Math.random() - 0.5) * 15, vy: Math.random() * -20 - 10, size: Math.random() * 6 + 4, color: ['#d4af37', '#b87333', '#fff'][Math.floor(Math.random()*3)], gravity: 0.6, angle: Math.random() * 6.28 }); requestAnimationFrame(updateConfetti); }
@@ -243,4 +214,3 @@
     </script>
 </body>
 </html>
-
