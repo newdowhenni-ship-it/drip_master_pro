@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drip Master Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-start: #fdfaf7; --bg-end: #e8e2d9; 
+            --coffee: #5d4037; --accent: #d35400; 
+            --time: #3e2723; 
+            --timer-bg: rgba(255, 255, 255, 0.5);
+            --radius: 12px;
+            --c1: #c6a15b; --c2: #a67c00; --c3: #8d6e63; --c4: #5d4037; --c5: #3e2723; 
+            --lucky-gold: #d4af37;
+            --water-accent: #b3e5fc;
+            --inactive-gray: #999; 
+        }
+        body { 
+            font-family: -apple-system, sans-serif; text-align: center; 
+            background: radial-gradient(circle, var(--bg-start) 0%, var(--bg-end) 100%); 
+            margin: 0; padding: 0 15px; color: #333; overflow-y: auto; height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .main-wrapper { max-width: 400px; width: 100%; display: flex; flex-direction: column; height: 100%; justify-content: space-around; padding: 5px 0; }
+        .timer-container { margin: 5px 0; display: inline-block; padding: 10px 45px; border-radius: var(--radius); background: var(--timer-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); align-self: center; }
+        .timer { font-family: 'Roboto Mono', monospace; font-size: 3.5rem; margin: 0; color: var(--time); letter-spacing: -2px; line-height: 1; }
+        
+        .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
+        .recipe-btn { padding: 8px; font-size: 0.8rem; border: 2px solid var(--coffee); background: rgba(255,255,255,0.8); color: var(--coffee); border-radius: var(--radius); font-weight: bold; cursor: pointer; }
+        .recipe-btn.active { background: var(--coffee); color: white; }
+
+        .target-container { position: relative; width: 340px; height: 260px; margin: 5px auto -20px auto; display: flex; align-items: center; justify-content: center; }
+        .progress-ring { position: absolute; }
+        .progress-ring__circle { transition: stroke-dashoffset 0.1s linear, stroke 0.3s, opacity 0.3s; stroke-linecap: round; fill: transparent; }
+        .progress-ring__bg { stroke: var(--inactive-gray); opacity: 0.25; fill: transparent; }
+        
+        .target-area { z-index: 2; text-align: center; width: 100%; }
+        .status-badge { display: inline-block; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(4px); padding: 4px 16px; border-radius: var(--radius); margin-bottom: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .status { font-size: 0.85rem; font-weight: bold; color: var(--coffee); letter-spacing: 1px; text-transform: uppercase; transition: color 0.5s; }
+        .target-water { font-family: 'Roboto Mono', monospace; font-size: 3.8rem; color: var(--accent); font-weight: 700; line-height: 1; }
+        .cumulative-box { margin-top: 15px; font-family: 'Roboto Mono', monospace; font-size: 1.5rem; color: #444; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 8px; display: inline-block; min-width: 180px; }
+        .cum-label { font-size: 0.75rem; color: #999; display: block; font-family: sans-serif; font-weight: bold; }
+
+        .cup-container { width: 200px; height: 200px; margin: 0 auto; position: relative; }
+        .cup-svg { width: 100%; height: 100%; overflow: visible; }
+        
+        @keyframes refined-blink { 0% { opacity: 0.25; } 50% { opacity: 1; } 100% { opacity: 0.25; } }
+        .pour-indicator { fill: var(--inactive-gray); opacity: 0.25; transition: fill 0.4s, opacity 0.4s; }
+        .pour-indicator.active { fill: var(--water-accent); animation: refined-blink 1.0s infinite ease-in-out; }
+
+        #dripperLiquid { transition: y 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; }
+        
+        @keyframes drop-fall { 
+            0% { transform: translateY(0); opacity: 0; } 
+            10% { opacity: 1; }
+            50% { opacity: 1; }
+            80% { opacity: 0; }
+            100% { transform: translateY(var(--drop-dist)); opacity: 0; } 
+        }
+        
+        .drop-coffee { fill: rgba(93, 64, 55, 0.4); visibility: hidden; }
+        .active-coffee { visibility: visible !important; animation: drop-fall 0.8s infinite linear; }
+        .finish-glow { animation: glow 2s infinite ease-in-out; }
+        @keyframes glow { 0% { fill: #a1887f; } 50% { fill: #d4af37; filter: drop-shadow(0 0 10px #ffd700); } 100% { fill: #a1887f; } }
+
+        .controls { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 12px; margin-top: 5px; padding-bottom: 20px; width: 100%; }
+        button.main-btn { height: 50px; font-size: 1rem; border-radius: var(--radius); border: none; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        #startBtn { background: var(--coffee); color: white; }
+        #skipBtn { background: rgba(255,255,255,0.8); color: var(--coffee); }
+        #resetBtn { background: rgba(0,0,0,0.1); color: #666; }
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+    </style>
+</head>
+<body id="body">
+    <canvas id="confetti"></canvas>
+
+    <div class="main-wrapper">
+        <div class="recipe-grid">
+            <button class="recipe-btn" onclick="setRecipe('small_std', this)">10g / Std<br>160g</button>
+            <button class="recipe-btn" onclick="setRecipe('small_light', this)">10g / Light<br>240g</button>
+            <button class="recipe-btn active" onclick="setRecipe('std_std', this)">15g / Std<br>240g</button>
+            <button class="recipe-btn" onclick="setRecipe('std_light', this)">15g / Light<br>360g</button>
+        </div>
+
+        <div class="timer-container">
+            <div class="timer" id="display">00:00</div>
+        </div>
+
+        <div class="target-container">
+            <svg class="progress-ring" width="340" height="260" viewBox="0 0 340 260">
+                <g id="rings-group"></g>
+            </svg>
+            <div class="target-area">
+                <div class="status-badge"><div id="status" class="status">READY</div></div>
+                <div class="target-water"><span id="water">0.0</span><span style="font-size:1.6rem;margin-left:4px">g</span></div>
+                <div class="cumulative-box">
+                    <span class="cum-label">TOTAL TARGET</span>
+                    <span id="cum-water">0.0</span>g
+                </div>
+            </div>
+        </div>
+
+        <div class="cup-container" id="cupSection">
+            <svg class="cup-svg" viewBox="0 0 200 200">
+                <defs>
+                    <clipPath id="innerCup"><path d="M60 80 L140 80 L135 150 Q133 170 110 170 L90 170 Q67 170 65 150 Z" /></clipPath>
+                    <clipPath id="innerDripper"><path d="M65 10 L135 10 L105 60 L95 60 Z" /></clipPath>
+                    <path id="sharpDrop" d="M100 0 C100 0 108 12 108 18 A8 8 0 0 1 92 18 C92 12 100 0 100 0 Z" />
+                </defs>
+                <use id="water-1" href="#sharpDrop" x="0" y="-25" class="pour-indicator" />
+                <use id="water-2a" href="#sharpDrop" x="-16" y="-25" class="pour-indicator" />
+                <use id="water-2b" href="#sharpDrop" x="16" y="-25" class="pour-indicator" />
+                
+                <path id="coffeeDrop" class="drop-coffee" d="M100 65 Q103 65 103 70 Q103 75 100 75 Q97 75 97 70 Q97 65 100 65 Z" />
+                
+                <rect id="liquid" x="0" y="170" width="200" height="100" fill="#a1887f" clip-path="url(#innerCup)" />
+                <rect id="dripperLiquid" x="0" y="60" width="200" height="60" fill="#d7ccc8" clip-path="url(#innerDripper)" opacity="0" />
+                <path d="M60 80 L140 80 L135 150 Q133 170 110 170 L90 170 Q67 170 65 150 Z" fill="none" stroke="#5d4037" stroke-width="4" />
+                <path d="M140 100 Q155 100 155 120 Q155 140 138 140" fill="none" stroke="#5d4037" stroke-width="4" />
+                <path d="M65 10 L135 10 L105 60 L95 60 Z" fill="none" stroke="#8d6e63" stroke-width="2" stroke-dasharray="2,1" />
+            </svg>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleTimer()" id="startBtn" class="main-btn">START</button>
+            <button onclick="skipStep()" id="skipBtn" class="main-btn">SKIP</button>
+            <button onclick="resetTimer()" id="resetBtn" class="main-btn">RESET</button>
+        </div>
+    </div>
+
+    <script>
+        let timeMs = 0, timerId = null, wakeLock = null, lastPhase = -1, finishText = "", isLuckyFinish = false;
+        const recipes = { small_std: { steam: 20, first: 100, second: 160 }, small_light: { steam: 20, first: 150, second: 240 }, std_std: { steam: 30, first: 150, second: 240 }, std_light: { steam: 30, first: 225, second: 360 } };
+        const commonGreetings = ["Enjoy your coffee!", "Time for a break.", "Smells amazing!", "Your cup is ready.", "Relax and enjoy.", "Freshly brewed.", "Stay mindful.", "A sip of peace.", "Savor the flavor.", "Happiness in a cup.", "Take a deep breath.", "Enjoy the silence.", "Fuel for your soul.", "Sip, smile, repeat.", "Good coffee, good day."];
+        const luckyGreetings = ["Pure Magic in a Cup.", "The Best Part of Today.", "A Masterpiece for You."];
+        let currentRecipe = recipes.std_std;
+        const phaseColors = ['', 'var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'];
+        const ringGroup = document.getElementById('rings-group');
+        const radii = [125, 114, 103, 92, 81];
+        const arcLength = 250; 
+
+        radii.forEach((r, i) => {
+            const circum = 2 * Math.PI * r; const dashArray = (arcLength / 360) * circum;
+            const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            bg.setAttribute("class", "progress-ring__bg"); bg.setAttribute("cx", "170"); bg.setAttribute("cy", "130"); bg.setAttribute("r", r); bg.setAttribute("stroke-width", "5");
+            bg.style.strokeDasharray = `${dashArray} ${circum}`; bg.style.transform = `rotate(${90 + (360-arcLength)/2}deg)`; bg.style.transformOrigin = "center";
+            ringGroup.appendChild(bg);
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("id", `ring-${5-i}`); circle.setAttribute("class", "progress-ring__circle"); circle.setAttribute("cx", "170"); circle.setAttribute("cy", "130"); circle.setAttribute("r", r); circle.setAttribute("stroke-width", "8");
+            circle.style.strokeDasharray = `${dashArray} ${circum}`; circle.style.strokeDashoffset = dashArray; circle.style.transform = `rotate(${90 + (360-arcLength)/2}deg)`; circle.style.transformOrigin = "center";
+            ringGroup.appendChild(circle);
+        });
+
+        async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
+        function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
+        function triggerVibration(isSpecial = false) { if ('vibrate' in navigator) { if (isSpecial) navigator.vibrate([100, 50, 100, 50, 300]); else navigator.vibrate(150); } }
+
+        function updateProgress(phase, percent) {
+            if (phase !== lastPhase && phase > 0) { triggerVibration(); lastPhase = phase; }
+            for (let i = 1; i <= 5; i++) {
+                const ring = document.getElementById(`ring-${i}`); const r = radii[5-i]; const circum = 2 * Math.PI * r; const dashArray = (arcLength / 360) * circum;
+                if (i < phase) { ring.style.strokeDashoffset = 0; ring.style.stroke = phaseColors[i]; ring.style.opacity = "0.4"; }
+                else if (i === phase) { ring.style.strokeDashoffset = dashArray - (percent / 100 * dashArray); ring.style.stroke = phaseColors[i]; ring.style.opacity = "1"; }
+                else { ring.style.strokeDashoffset = dashArray; ring.style.opacity = "0"; }
+            }
+        }
+
+        function updateLogic() {
+            const sec = timeMs / 1000, r = currentRecipe;
+            const liquid = document.getElementById('liquid'); const statusEl = document.getElementById('status');
+            const w1 = document.getElementById('water-1'); const w2a = document.getElementById('water-2a'); const w2b = document.getElementById('water-2b');
+            document.getElementById('display').innerText = `${Math.floor(sec / 60).toString().padStart(2, '0')}:${Math.floor(sec % 60).toString().padStart(2, '0')}`;
+            const liquidY = 170 - (Math.min(1, sec / 180) * 90);
+            liquid.setAttribute('y', liquidY);
+            document.documentElement.style.setProperty('--drop-dist', `${liquidY - 65}px`);
+            const dLiq = document.getElementById('dripperLiquid'); const coffeeDrop = document.getElementById('coffeeDrop');
+            let dY = 60;
+            w1.classList.remove('active'); w2a.classList.remove('active'); w2b.classList.remove('active');
+            w1.style.visibility = "visible"; w2a.style.visibility = "hidden"; w2b.style.visibility = "hidden";
+            if (timeMs === 0) { dLiq.style.opacity = "0"; dY = 60; finishText = ""; isLuckyFinish = false; statusEl.style.color = "var(--coffee)"; } 
+            else {
+                dLiq.style.opacity = "1";
+                if (sec <= 45) { dY = 40; }
+                else if (sec <= 75) { dY = 40 - ((sec - 45) / 30 * 30); w1.classList.add('active'); }
+                else if (sec <= 105) { dY = 10 + ((sec - 75) / 30 * 30); w1.style.visibility = "hidden"; w2a.style.visibility = "visible"; w2b.style.visibility = "visible"; }
+                else if (sec <= 135) { dY = 40 - ((sec - 105) / 30 * 30); w1.style.visibility = "hidden"; w2a.style.visibility = "visible"; w2b.style.visibility = "visible"; w2a.classList.add('active'); w2b.classList.add('active'); }
+                else { dY = 10 + ((Math.min(180, sec) - 135) / 45 * 50); w1.style.visibility = "hidden"; w2a.style.visibility = "visible"; w2b.style.visibility = "visible"; }
+            }
+            dLiq.setAttribute('y', dY);
+            if (timeMs > 0 && sec < 180) coffeeDrop.classList.add('active-coffee');
+            else coffeeDrop.classList.remove('active-coffee');
+            let target = 0, cumTarget = 0, statusText = "", phase = 0, percent = 0;
+            if (timeMs === 0) { statusText = "READY"; target = r.steam; cumTarget = r.steam; liquid.classList.remove('finish-glow'); }
+            else if (sec <= 45) { statusText = "BLOOMING"; target = r.steam; cumTarget = r.steam; percent = (sec/45)*100; phase = 1; }
+            else if (sec <= 75) { statusText = "1ST POUR"; target = r.steam + ((r.first-r.steam)*((sec-45)/30)); cumTarget = r.first; percent = ((sec-45)/30)*100; phase = 2; }
+            else if (sec <= 105) { statusText = "INTERVAL"; target = r.first; cumTarget = r.first; percent = ((sec-75)/30)*100; phase = 3; }
+            else if (sec <= 135) { statusText = "2ND POUR"; target = r.first + ((r.second-r.first)*((sec-105)/30)); cumTarget = r.second; percent = ((sec-105)/30)*100; phase = 4; }
+            else if (sec <= 180) { statusText = "DRAWDOWN"; target = r.second; cumTarget = r.second; percent = ((sec-135)/45)*100; phase = 5; }
+            else { 
+                if (!finishText) { 
+                    const isLucky = isLuckyFinish || Math.random() < 0.05; 
+                    if (isLucky) { finishText = luckyGreetings[Math.floor(Math.random() * luckyGreetings.length)]; isLuckyFinish = true; statusEl.style.color = "var(--lucky-gold)"; } 
+                    else { finishText = commonGreetings[Math.floor(Math.random() * commonGreetings.length)]; isLuckyFinish = false; } 
+                }
+                statusText = finishText; target = r.second; cumTarget = r.second; percent = 100; phase = 6; 
+                if(timerId) { stopTimer(); initConfetti(); triggerVibration(isLuckyFinish); liquid.classList.add('finish-glow'); } 
+                document.getElementById('startBtn').innerText = "START"; 
+            }
+            statusEl.innerText = statusText; document.getElementById('water').innerText = target.toFixed(1); document.getElementById('cum-water').innerText = cumTarget.toFixed(1); updateProgress(phase, percent);
+        }
+
+        function setRecipe(key, btn) { if (timerId) return; currentRecipe = recipes[key]; document.querySelectorAll('.recipe-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateLogic(); }
+        function toggleTimer() { if (timeMs >= 180000) { resetTimer(); return; } if (timerId) { stopTimer(); releaseWakeLock(); document.getElementById('startBtn').innerText = "RESUME"; } else { document.getElementById('startBtn').innerText = "STOP"; requestWakeLock(); timerId = setInterval(() => { timeMs += 100; updateLogic(); }, 100); } }
+        function stopTimer() { clearInterval(timerId); timerId = null; }
+        function resetTimer() { stopTimer(); releaseWakeLock(); timeMs = 0; lastPhase = -1; finishText = ""; isLuckyFinish = false; document.getElementById('startBtn').innerText = "START"; updateLogic(); }
+        function skipStep() { 
+            const phases = [45, 75, 105, 135, 180]; 
+            let sec = timeMs / 1000; 
+            for (let p of phases) { 
+                if (sec < p) { 
+                    const dLiq = document.getElementById('dripperLiquid');
+                    dLiq.style.transition = "none";
+                    timeMs = p * 1000; 
+                    updateLogic(); 
+                    setTimeout(() => { dLiq.style.transition = "y 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s"; }, 0);
+                    break; 
+                } 
+            } 
+        }
+        const confettiCanvas = document.getElementById('confetti'); const ctx = confettiCanvas.getContext('2d'); let pieces = [];
+        function initConfetti() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; pieces = []; for (let i = 0; i < 60; i++) pieces.push({ x: confettiCanvas.width / 2, y: confettiCanvas.height / 2, vx: (Math.random() - 0.5) * 15, vy: Math.random() * -20 - 10, size: Math.random() * 6 + 4, color: ['#d4af37', '#b87333', '#fff'][Math.floor(Math.random()*3)], gravity: 0.6, angle: Math.random() * 6.28 }); requestAnimationFrame(updateConfetti); }
+        function updateConfetti() { if (pieces.length === 0) return; ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); pieces.forEach((p) => { p.vy += p.gravity; p.x += p.vx; p.y += p.vy; p.angle += 0.1; ctx.fillStyle = p.color; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle); ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size); ctx.restore(); }); pieces = pieces.filter(p => p.y < confettiCanvas.height); if (pieces.length > 0) requestAnimationFrame(updateConfetti); }
+        updateLogic();
+    </script>
+</body>
+</html>
