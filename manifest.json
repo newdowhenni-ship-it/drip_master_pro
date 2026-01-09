@@ -1,22 +1,16 @@
 {
   "name": "Drip Master Pro",
   "short_name": "DripMaster",
+  "display": "standalone",
   "start_url": "/drip_master_pro/index.html",
   "scope": "/drip_master_pro/",
-  "display": "standalone",
   "background_color": "#fdfaf7",
   "theme_color": "#5d4037",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/drip_master_pro/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
       "type": "image/png"
     }
   ]
-
 }
