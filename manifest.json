@@ -1,7 +1,8 @@
 {
   "name": "Drip Master Pro",
   "short_name": "DripMaster",
-  "start_url": "index.html",
+  "start_url": "/drip_master_pro/index.html",
+  "scope": "/drip_master_pro/",
   "display": "standalone",
   "background_color": "#fdfaf7",
   "theme_color": "#5d4037",
@@ -17,4 +18,5 @@
       "type": "image/png"
     }
   ]
+
 }
