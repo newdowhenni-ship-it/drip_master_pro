@@ -108,9 +108,9 @@
     <canvas id="confetti"></canvas>
     <div class="main-wrapper">
         <div class="recipe-grid">
-            <button class="recipe-btn" onclick="setRecipe('small_std', this)">10g / Std<br>160g</button>
-            <button class="recipe-btn" onclick="setRecipe('small_light', this)">10g / Light<br>240g</button>
-            <button class="recipe-btn active" onclick="setRecipe('std_std', this)">15g / Std<br>240g</button>
+            <button class="recipe-btn" onclick="setRecipe('small_std', this)">10g / Std<br>180g</button>
+            <button class="recipe-btn" onclick="setRecipe('small_light', this)">10g / Light<br>250g</button>
+            <button class="recipe-btn active" onclick="setRecipe('std_std', this)">15g / Std<br>250g</button>
             <button class="recipe-btn" onclick="setRecipe('std_light', this)">15g / Light<br>360g</button>
         </div>
         <div class="timer-container">
@@ -160,7 +160,7 @@
         }
 
         let timeMs = 0, timerId = null, wakeLock = null, lastPhase = -1, finishText = "", isLuckyFinish = false;
-        const recipes = { small_std: { steam: 20, first: 100, second: 160 }, small_light: { steam: 20, first: 150, second: 240 }, std_std: { steam: 30, first: 150, second: 240 }, std_light: { steam: 30, first: 225, second: 360 } };
+        const recipes = { small_std: { steam: 20, first: 100, second: 180 }, small_light: { steam: 20, first: 150, second: 250 }, std_std: { steam: 30, first: 150, second: 250 }, std_light: { steam: 30, first: 220, second: 360 } };
         const commonGreetings = ["Enjoy your coffee!", "Time for a break.", "Smells amazing!", "Your cup is ready.", "Relax and enjoy.", "Freshly brewed.", "Stay mindful.", "A sip of peace.", "Savor the flavor.", "Happiness in a cup.", "Take a deep breath.", "Enjoy the silence.", "Fuel for your soul.", "Sip, smile, repeat.", "Good coffee, good day."];
         const luckyGreetings = ["Pure Magic in a Cup.", "The Best Part of Today.", "A Masterpiece for You."];
         let currentRecipe = recipes.std_std;
@@ -255,6 +255,7 @@
     </script>
 </body>
 </html>
+
 
 
 
